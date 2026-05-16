@@ -28,6 +28,8 @@ GenomeLens is a modular, scalable web application for browsing, filtering, searc
 - Redux Toolkit slice manages UI state (selected gene, active tab)
 - SQLite database seeded from `genes_human.csv` via `seed.py`; swappable to PostgreSQL with one config change
 - SQLite indexes on `biotype`, `chromosome`, and `gene_symbol` for fast filtering at scale
+- Centralized structured logging configured once at startup via `app/logging_config.py`; all modules use `logging.getLogger(__name__)`
+- GTEx proxy errors are logged server-side with full detail; only a sanitized message is returned to the client
 
 ### Testing
 
@@ -56,14 +58,16 @@ GenomeLens is a modular, scalable web application for browsing, filtering, searc
 
 ### Backend
 
-| Concern           | Technology                                   |
-| ----------------- | -------------------------------------------- |
-| Framework         | FastAPI                                      |
-| ORM               | SQLAlchemy                                   |
-| Database          | SQLite (file-based, swappable to PostgreSQL) |
-| Schema Validation | Pydantic v2 + pydantic-settings              |
-| Server            | Uvicorn                                      |
-| Tests             | pytest + httpx (async client)                |
+| Concern           | Technology                                                 |
+| ----------------- | ---------------------------------------------------------- |
+| Framework         | FastAPI                                                    |
+| ORM               | SQLAlchemy 2.x                                             |
+| Database          | SQLite (file-based, swappable to PostgreSQL)               |
+| Schema Validation | Pydantic v2 + pydantic-settings                            |
+| Server            | Uvicorn                                                    |
+| HTTP Client       | httpx (async, for GTEx / MyGene.info proxying)             |
+| Logging           | Python `logging` — centralized via `app/logging_config.py` |
+| Tests             | pytest + httpx (async client)                              |
 
 ---
 
@@ -168,23 +172,25 @@ genome_lens/
 ├── README.md
 │
 ├── backend/
+│   ├── .env                     # Local env overrides (DATABASE_URL, CORS_ORIGINS, …)
 │   ├── app/
 │   │   ├── __init__.py
-│   │   ├── main.py              # FastAPI app, CORS, router registration
-│   │   ├── config.py            # pydantic-settings: DB URL, CORS origins, env vars
+│   │   ├── main.py              # FastAPI app factory, CORS middleware, router registration
+│   │   ├── config.py            # pydantic-settings: DB URL, CORS origins, host/port, GTEx base URL
 │   │   ├── database.py          # SQLAlchemy engine, SessionLocal, Base
-│   │   ├── models.py            # ORM model: Gene table (SQLAlchemy)
-│   │   ├── schemas.py           # Pydantic schemas: GeneOut, PagedResponse (NOT ORM)
-│   │   ├── crud.py              # DB queries: filter, sort, paginate — all in SQL
+│   │   ├── models.py            # ORM model: Gene table
+│   │   ├── schemas.py           # Pydantic schemas: GeneOut, PagedResponse, ExpressionPoint, DifferentialResult
+│   │   ├── crud.py              # DB queries: filter, sort, paginate — typed with ColumnElement
+│   │   ├── logging_config.py    # Centralized logging setup (call once at startup)
 │   │   ├── routers/
 │   │   │   ├── genes.py         # /api/v1/genes — list + detail + meta dropdowns
-│   │   │   ├── expression.py    # /api/v1/genes/{id}/expression — proxies GTEx/CCLE
-│   │   │   └── differential.py  # /api/v1/genes/differential — DESeq2 via PyDESeq2
-│   │   └── seed.py              # One-time CSV → SQLite loader script
+│   │   │   ├── expression.py    # /api/v1/genes/{id}/expression — GTEx proxy, sanitized errors
+│   │   │   └── differential.py  # /api/v1/genes/differential — DESeq2 scaffold (placeholder)
+│   │   └── seed.py              # One-time CSV → SQLite loader (pathlib, batch insert)
 │   ├── tests/
 │   │   ├── conftest.py          # pytest fixtures, in-memory test DB
 │   │   └── test_genes.py        # Integration tests (httpx AsyncClient)
-│   ├── pyproject.toml           # deps: fastapi, uvicorn, sqlalchemy, pydantic-settings
+│   ├── pyproject.toml           # deps: fastapi, uvicorn, sqlalchemy, pydantic-settings, httpx
 │   └── README.md
 │
 ├── frontend/
@@ -249,6 +255,7 @@ genome_lens/
 
 - SQLite indexes on `biotype`, `chromosome`, `gene_symbol` for fast filtering
 - All filtering/sorting/pagination done in SQL — zero in-memory row processing
+- Bulk CSV seeding in batches of 1 000 rows for fast initial load
 
 ### Frontend
 
