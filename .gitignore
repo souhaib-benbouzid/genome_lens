@@ -1,4 +1,4 @@
-challenge.pdf
-genes_human.csv
+.env
+.env.prod
+.env.dev
 .vscode
-    

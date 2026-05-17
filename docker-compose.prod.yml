@@ -1,0 +1,77 @@
+# Production compose — deployed via Coolify on a VPS.
+#
+# Key decisions:
+#  • backend is NOT published to the host; nginx proxies /api/ internally.
+#  • A named volume persists the SQLite database across deployments.
+#  • Environment Variables UI are injected at runtime.
+#  • 'deploy.resources' caps memory so one service can't starve the VPS.
+
+services:
+  # ── FastAPI backend ──────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    expose:
+      - "8000"
+    restart: unless-stopped
+    environment:
+      DATABASE_URL:    ${DATABASE_URL:-sqlite:////app/data/genome_lens.db}
+      CORS_ORIGINS:    ${CORS_ORIGINS}
+      CSV_PATH:        ${CSV_PATH:-/app/genes_human.csv}
+      HOST:            ${HOST:-0.0.0.0}
+      PORT:            ${PORT:-8000}
+      WORKERS:         ${WORKERS:-1}
+      ENVIRONMENT:     ${ENVIRONMENT:-production}
+      DEBUG:           ${DEBUG:-False}
+      GTEX_API_BASE:   ${GTEX_API_BASE:-https://gtexportal.org/api/v2}
+      MYGENE_API_BASE: ${MYGENE_API_BASE:-https://mygene.info/v3}
+    volumes:
+      - db_data:/app/data # persist DB between deployments
+    networks:
+      - app_net
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')",
+        ]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s # allow time for DB seed on first boot
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+        reservations:
+          memory: 256m
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    depends_on:
+      backend:
+        condition: service_healthy # wait until /health returns 200 before accepting traffic
+    restart: unless-stopped
+    networks:
+      - app_net
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+        reservations:
+          memory: 32m
+
+# ── Shared resources ──────────────────────────────────────────────────────────
+volumes:
+  db_data:
+
+networks:
+  app_net:
+    driver: bridge

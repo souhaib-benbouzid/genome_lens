@@ -285,3 +285,81 @@ RTK Query → FastAPI /api/v1/genes → SQLAlchemy → SQLite
 1. Dispatches user actions to Redux (selection, filters, sort)
 2. Fires RTK Query hooks that map to FastAPI endpoints
 3. Renders the JSON responses using Mantine + Gosling.js + ECharts
+
+## Deployment
+
+- The backend and frontend are containerized with separate Dockerfiles
+- `docker-compose.prod.yml` orchestrates both services, with environment variables for configuration
+- The frontend is exposed on port 80 (configurable via `FRONTEND_PORT`) using nginx, while the backend is only accessible internally
+- The backend listens on port 8000, but is not exposed publicly — only accessible from the frontend container
+- SQLite database is stored in a Docker volume for persistence across container restarts
+
+```
+# -- Request flow in production -- #
+
+Browser Request
+      │
+      ▼
+┌─────────────────────────────────────┐
+│         nginx  (port 80)            │
+│                                     │
+│  ┌──────────────────────────────┐   │
+│  │   Pattern Matching (top→down)│   │
+│  └──────────────┬───────────────┘   │
+│                 │                   │
+│    ┌────────────┼─────────────┐     │
+│    ▼            ▼             ▼     │
+│ /api/**      /health       *.js     │
+│ *.css *.png  passthrough   *.css    │
+│ /health                   *.woff    │
+│    │            │             │     │
+└────┼────────────┼─────────────┼─────┘
+     │            │             │
+     ▼            ▼             ▼
+ backend:8000  backend:8000  /usr/share/
+  (proxy)       /health      nginx/html
+                             (static)
+
+
+# -- nginx decision tree -- #
+
+
+Incoming URL
+     │
+     ├── matches ~* \.(js|css|png|svg…)?
+     │        │
+     │        └── YES ──► Serve from /usr/share/nginx/html
+     │                    Cache-Control: immutable, 1 year
+     │                    (content-hashed filenames = safe)
+     │
+     ├── starts with /api/ ?
+     │        │
+     │        └── YES ──► PROXY ──► http://backend:8000
+     │                    (removes CORS, hides backend port)
+     │
+     ├── exact /health ?
+     │        │
+     │        └── YES ──► PROXY ──► http://backend:8000/health
+     │                    (no access log — avoids noise)
+     │
+     └── anything else (/, /dashboard, /gene/123…)
+              │
+              └── try file → try directory → /index.html
+                  (SPA fallback — React Router takes over)
+
+
+# -- Container Topology -- #
+
+┌─────────────── Docker network: app_net ───────────────┐
+│                                                       │
+│  ┌───────────────────┐        ┌────────────────────┐  │
+│  │  frontend         │        │  backend           │  │
+│  │  nginx:alpine     │        │  python:3.11-slim  │  │
+│  │  port 80 ◄── host │─DNS──► │  port 8000         │  │
+│  └───────────────────┘        │  (NOT exposed)     │  │
+│                               └────────────────────┘  │
+└───────────────────────────────────────────────────────┘
+
+Traefik talks to frontend:80 only.
+nginx talks to backend:8000 internally via Docker DNS.
+```

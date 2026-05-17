@@ -1,0 +1,71 @@
+# Development compose — run with: docker compose -f docker-compose.dev.yml up --build
+#
+# Differences from prod:
+#  • Backend port 8000 is published so you can hit the API directly / Swagger UI.
+#  • Backend source is mounted as a volume; uvicorn runs with --reload.
+#  • Sensible defaults mean you need no .env file to get started.
+#  • No resource limits — use whatever the dev machine has.
+
+services:
+  # ── FastAPI backend ──────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    command: >
+      uvicorn app.main:app
+      --host 0.0.0.0
+      --port 8000
+      --reload
+    volumes:
+      - ./backend/app:/app/app # hot-reload: code changes reflect immediately
+      - dev_db_data:/app/data # persist dev DB between restarts
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-sqlite:////app/data/genome_lens.db}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:8080,http://localhost:80}
+      CSV_PATH: ${CSV_PATH:-/app/genes_human.csv}
+      HOST: ${HOST:-0.0.0.0}
+      PORT: ${PORT:-8000}
+      WORKERS: ${WORKERS:-1}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      DEBUG: ${DEBUG:-True}
+      GTEX_API_BASE: ${GTEX_API_BASE:-https://gtexportal.org/api/v2}
+      MYGENE_API_BASE: ${MYGENE_API_BASE:-https://mygene.info/v3}
+    networks:
+      - app_net
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')",
+        ]
+      interval: 15s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+
+  # ── nginx + React SPA ────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app_net
+
+volumes:
+  dev_db_data:
+
+networks:
+  app_net:
+    driver: bridge

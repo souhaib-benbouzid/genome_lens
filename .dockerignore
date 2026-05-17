@@ -1,0 +1,42 @@
+# ── Version control ───────────────────────────────────────────────────────────
+.git
+.gitignore
+.gitattributes
+
+# ── Documentation ─────────────────────────────────────────────────────────────
+README.md
+ARCHITECTURE.md
+LICENSE
+**/*.md
+
+# ── Local environment & secrets ───────────────────────────────────────────────
+.env
+.env.*
+*.env
+
+# ── Python ───────────────────────────────────────────────────────────────────
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+backend/.venv
+backend/build
+backend/*.egg-info
+
+# ── Node / Frontend ───────────────────────────────────────────────────────────
+frontend/node_modules
+frontend/.pnpm-store
+frontend/dist
+frontend/.cache
+
+# ── IDE & OS ──────────────────────────────────────────────────────────────────
+.vscode
+.idea
+**/.DS_Store
+**/Thumbs.db
+
+# ── Test artifacts ────────────────────────────────────────────────────────────
+backend/tests
