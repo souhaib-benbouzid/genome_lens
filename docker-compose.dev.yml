@@ -13,27 +13,25 @@ services:
       context: .
       dockerfile: backend/Dockerfile
     ports:
-      - "8000:8000"
+      - "${PORT:-8000}:8000"
     restart: unless-stopped
     command: >
+      sh -c "python -m app.seed &&
       uvicorn app.main:app
       --host 0.0.0.0
-      --port 8000
+      --port ${PORT:-8000}
       --reload
+      --reload-dir /app/app
+      --reload-include '*.py'"
+    user: root
     volumes:
-      - ./backend/app:/app/app # hot-reload: code changes reflect immediately
-      - dev_db_data:/app/data # persist dev DB between restarts
+      - ./backend/app:/app/app
+      - dev_db_data:/app/data
+    env_file:
+      - ./backend/.env
     environment:
-      DATABASE_URL: ${DATABASE_URL:-sqlite:////app/data/genome_lens.db}
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:8080,http://localhost:80}
-      CSV_PATH: ${CSV_PATH:-/app/genes_human.csv}
-      HOST: ${HOST:-0.0.0.0}
-      PORT: ${PORT:-8000}
-      WORKERS: ${WORKERS:-1}
-      ENVIRONMENT: ${ENVIRONMENT:-development}
-      DEBUG: ${DEBUG:-True}
-      GTEX_API_BASE: ${GTEX_API_BASE:-https://gtexportal.org/api/v2}
-      MYGENE_API_BASE: ${MYGENE_API_BASE:-https://mygene.info/v3}
+      # Docker-internal watcher — not app config, so kept here not in .env
+      WATCHFILES_FORCE_POLLING: "true"
     networks:
       - app_net
     healthcheck:
@@ -49,13 +47,23 @@ services:
       start_period: 30s
       retries: 3
 
-  # ── nginx + React SPA ────────────────────────────────────────────────────────
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: node:20-slim
+    working_dir: /app
+    command: sh -c "corepack enable && corepack prepare pnpm@9.15.4 --activate && pnpm install --frozen-lockfile && pnpm dev"
     ports:
-      - "${FRONTEND_PORT:-8080}:80"
+      - "${FRONTEND_PORT:-8080}:8080"
+    volumes:
+      - ./frontend:/app # mount entire frontend so edits are live
+      - /app/node_modules # anonymous volume prevents host node_modules overwriting container's
+    env_file:
+      - ./frontend/.env
+    environment:
+      # Force polling for all file watchers inside Docker on Windows hosts.
+      # Native inotify events don't reach the container over the WSL2 volume mount.
+      CHOKIDAR_USEPOLLING: "true"
+      CHOKIDAR_INTERVAL: "200"
+      WATCHPACK_POLLING: "true"
     depends_on:
       backend:
         condition: service_healthy
