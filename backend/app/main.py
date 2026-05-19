@@ -32,15 +32,10 @@ app.include_router(genes.router, prefix="/api/v1")
 
 @app.get("/health", tags=["health"])
 def health():
-    return {"status": "ok"}
+    return {"status": "ok", "version": "v1.0.0", "description": "test."}
 
 
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(
-        "app.main:app",
-        host=settings.host,
-        port=settings.port,
-        reload=False,
-    )
+    uvicorn.run("app.main:app", host=settings.host, port=settings.port, reload=True)
