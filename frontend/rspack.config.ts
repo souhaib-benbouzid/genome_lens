@@ -54,4 +54,17 @@ export default defineConfig({
     }),
     isDev && new ReactRefreshRspackPlugin(),
   ],
+  devServer: {
+    host: '0.0.0.0',
+    port: process.env.FRONTEND_PORT
+      ? parseInt(process.env.FRONTEND_PORT)
+      : 8080,
+    proxy: [
+      {
+        context: ['/api', '/health'],
+        target: process.env.BACKEND_URL ?? 'http://backend:8000',
+        changeOrigin: true,
+      },
+    ],
+  },
 });
