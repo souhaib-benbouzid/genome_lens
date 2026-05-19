@@ -5,7 +5,6 @@ function App() {
   return (
     <div className="App">
       <header className="app-header"></header>
-
       <main className="app-main">
         <img
           src={banner}
@@ -15,7 +14,6 @@ function App() {
         />
         <p>Browse, Filter, Search and Visualize genomes and more.</p>
       </main>
-
       <footer className="app-footer">
         <small>GenomeLens © {new Date().getFullYear()}</small>
       </footer>
