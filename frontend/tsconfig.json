@@ -21,6 +21,6 @@
     },
     "types": ["node"]
   },
-  "include": ["src", "rspack.config.ts"],
+  "include": ["src", "rspack.config.ts", "tests"],
   "exclude": ["node_modules", "dist"]
 }

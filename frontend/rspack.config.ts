@@ -55,7 +55,10 @@ export default defineConfig({
     isDev && new ReactRefreshRspackPlugin(),
   ],
   devServer: {
-    host: '0.0.0.0',
+    host: 'localhost',
+      hot: true,
+    liveReload: true,
+    historyApiFallback: true,
     port: process.env.FRONTEND_PORT
       ? parseInt(process.env.FRONTEND_PORT)
       : 8080,
