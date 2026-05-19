@@ -1,4 +1,11 @@
+# Per-service env files (backend/ and frontend/ each have their own .env/.env.prod)
+# The actual ignore rules live in backend/.gitignore and frontend/.gitignore
 .env
 .env.prod
 .env.dev
 .vscode
+.pnpm-store
+node_modules
+dist
+build
+out

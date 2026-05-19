@@ -1,0 +1,22 @@
+{
+    "name": "genome-lens",
+    "version": "1.0.0",
+    "description": "Browse, Filter, Search and Visualize genomes and more.",
+    "license": "MIT",
+    "owners": [
+        {
+            "name": "Souhaib Benbouzid",
+            "email": "souhaib.benbouzid@gmail.com",
+            "github": "https://github.com/Souhaib-Benbouzid"
+        }
+    ],
+    "scripts": {
+        "dev": "docker-compose -f docker-compose.dev.yml up --build",
+        "prod": "docker-compose -f docker-compose.prod.yml up --build",
+        "frontend": "cd frontend && pnpm dev",
+        "backend": "cd backend && bash entrypoint.dev.sh"
+    },
+    "devDependencies": {
+        "concurrently": "^7.6.0"
+    }
+}
