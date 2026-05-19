@@ -46,13 +46,36 @@ To run the application, you can use Docker Compose. Make sure you have Docker in
    ```bash
    cd genome_lens
    ```
-3. Create a `.env` file in the project root and set any necessary environment variables (see `.env.example` for reference). For development, you can use the default values provided in `.env.dev`.
+3. Create a `.env.prod` file in both the frontend and backend directories by copying the provided `.env.example` and adjusting the values as needed:
+
+   ```bash
+   cp frontend/.env.example frontend/.env.prod
+   cp backend/.env.example backend/.env.prod
+   ```
 
 4. Start the application using Docker Compose:
    ```bash
-    docker-compose -f docker-compose.dev.yml up --build
+    docker-compose -f docker-compose.prod.yml up --build
    ```
-   This will build the Docker images for both the backend and frontend, and start the containers. The frontend will be accessible at `http://localhost:80` and the backend API will be accessible at `http://localhost:8000`.
+   This will build the Docker images for both the backend and frontend, and start the containers. The frontend will be accessible at `http://localhost:80`.
+   THE BACKEND API WILL IS NOT EXPOSED TO THE HOST IN PRODUCTION MODE FOR SECURITY REASONS. IT IS ONLY ACCESSIBLE TO THE FRONTEND CONTAINER.
+
+## Running in Development Mode
+
+To run the application in development mode, you can use the provided `docker-compose.dev.yml` file. This setup allows for hot-reloading of both the backend and frontend code.
+
+1. Create a `.env` file in both the frontend and backend directories by copying the provided `.env.example` and adjusting the values as needed:
+
+   ```bash
+   cp frontend/.env.example frontend/.env
+   cp backend/.env.example backend/.env
+   ```
+
+2. Start the application in development mode:
+   ```bash
+   docker-compose -f docker-compose.dev.yml up --build
+   ```
+   This will build the Docker images for both the backend and frontend, and start the containers with hot-reloading enabled. The frontend will be accessible at `http://localhost:8080` and the backend API will be accessible at `http://localhost:8000`.
 
 ## Contributing
 
