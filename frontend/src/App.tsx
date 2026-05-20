@@ -1,22 +1,11 @@
-import banner from '@/assets/banner.png';
+import { Layout } from './components/Layout/Layout';
 
 function App() {
   return (
-    <div className="App">
-      <header className="app-header"></header>
-      <main className="app-main">
-        <img
-          src={banner}
-          alt="GenomeLens banner"
-          className="app-banner"
-          width={100}
-        />
-        <p>Browse, Filter, Search and Visualize genomes and more.</p>
-      </main>
-      <footer className="app-footer">
-        <small>GenomeLens © {new Date().getFullYear()}</small>
-      </footer>
-    </div>
+    <Layout
+      leftPanelContent={<div>left</div>}
+      rightPanelContent={<div>right</div>}
+    />
   );
 }
 

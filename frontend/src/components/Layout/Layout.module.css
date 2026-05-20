@@ -1,0 +1,26 @@
+.body {
+  font-family: var(--mantine-font-family);
+  background-color: var(--mantine-color-body);
+  color: var(--mantine-color-dark);
+  height: 100vh;
+  max-height: 100vh;
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: row;
+  height: calc(100vh - 48px);
+}
+
+.leftPanel {
+  flex: 1;
+  border-right: 2px solid var(--mantine-color-dark-1);
+  padding: var(--mantine-spacing-xs);
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.rightPanel {
+  flex: 1.5;
+  padding: var(--mantine-spacing-xs);
+}
