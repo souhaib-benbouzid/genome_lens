@@ -29,7 +29,7 @@ backend/
 │   ├── config.py           # pydantic-settings — reads .env
 │   ├── database.py         # SQLAlchemy engine, SessionLocal, Base, get_db
 │   ├── models.py           # Gene ORM model
-│   ├── schemas.py          # Pydantic schemas (GeneOut, PagedResponse, …)
+│   ├── schemas.py          # Pydantic schemas (GeneOut, VirtualizedResponse, …)
 │   ├── crud.py             # All database queries (filter / sort / paginate)
 │   ├── seed.py             # CSV → SQLite loader (idempotent)
 │   ├── logging_config.py   # Structured logging setup
@@ -129,7 +129,7 @@ cd backend
 python -m pytest tests/ -v                    # macOS / Linux (venv activated)
 ```
 
-15 tests across 5 focused modules — all use SAVEPOINT-based transaction isolation (each test always rolls back, no data leaks between tests).
+All tests across all focused modules — all use SAVEPOINT-based transaction isolation (each test always rolls back, no data leaks between tests).
 
 ---
 
@@ -138,4 +138,7 @@ python -m pytest tests/ -v                    # macOS / Linux (venv activated)
 - **Router registration order matters**: the `differential` router is registered _before_ the `genes` router in `main.py` to prevent `/genes/differential` being matched as `/{ensembl_id}`.
 - **Fixed-path routes before path parameters**: `/meta/biotypes`, `/meta/chromosomes`, and `/differential` are declared before `/{ensembl_id}` within `genes.py` for the same reason.
 - **All filtering in SQL**: `crud.get_genes()` builds the `WHERE` / `ORDER BY` / `LIMIT OFFSET` query server-side — the frontend never receives unfiltered data.
+- **`sort_by` validation**: the router validates `sort_by` against the `SORTABLE_COLUMNS` dict in `crud.py` and returns a structured `422` (including a `valid_values` list) for unknown column names — no silent fallback.
+- **`has_more` flag**: `VirtualizedResponse` includes `has_more: bool` computed as `(offset + len(items)) < total`. The virtualized table uses this instead of computing it client-side.
+- **`name` search index**: `ix_genes_name` is defined on `Gene.name` to speed up the ILIKE search path that covers all three text columns.
 - **Idempotent seed**: `seed.py` checks row count before inserting, so re-running is safe.

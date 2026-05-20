@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-Browse, Filter, Search and Visualize genomes and more.
+Browse, filter, search, and visualize ~58 000 human genes in a virtualized infinite-scroll table.
 </p>
 
 <p align="center">
@@ -14,68 +14,77 @@ Browse, Filter, Search and Visualize genomes and more.
 <a href="https://github.com/souhaib-benbouzid/genome_lens/blob/master/LICENSE"><img src="https://img.shields.io/npm/l/tailwindcss.svg" alt="License"></a>
 </p>
 
-## Architecture
+---
 
-The architecture of GenomeLens is designed to be modular and scalable. The backend and frontend are decoupled, allowing for independent development and deployment. The backend serves as an API layer that the frontend consumes to display data and provide interactive features to the users.
+## Highlights
 
-[Read more about the architecture](./ARCHITECTURE.md)
+- **Virtualized table** — only the visible row window is fetched; the API drives scrollbar sizing via a `total` count and signals further pages with `has_more`
+- **Server-side everything** — all filtering, sorting, and windowing happens in SQL; the frontend is a pure rendering layer
+- **Full-text search** — searches across Ensembl ID, gene symbol, and gene name with indexed ILIKE queries
+- **Detail panel** — tabbed view per gene: genomic track (Gosling.js), expression chart (ECharts + GTEx proxy), differential expression (PyDESeq2 scaffold), and external links
+- **Type-safe end-to-end** — Pydantic v2 schemas on the backend, TypeScript interfaces on the frontend, RTK Query for data fetching
 
-## Backend
+---
 
-The backend is built using Python and FastAPI. It provides APIs to fetch genome data, filter it based on various criteria, and perform search operations.
+## Documentation
 
-[Read more about the backend implementation](./backend/README.md)
+| Document                                   | Description                                                               |
+| ------------------------------------------ | ------------------------------------------------------------------------- |
+| [ARCHITECTURE.md](./ARCHITECTURE.md)       | Full system design, API contract, data-flow diagrams, deployment topology |
+| [backend/README.md](./backend/README.md)   | Backend setup, environment variables, seeding, running tests              |
+| [frontend/README.md](./frontend/README.md) | Frontend setup, dev server, build                                         |
 
-## Frontend
+---
 
-The frontend is built using React. It provides a user interface to interact with the backend APIs, allowing users to browse, filter, search, and visualize genome data.
+## Quick Start
 
-[Read more about the frontend implementation](./frontend/README.md)
-
-## Running the Application
-
-To run the application, you can use Docker Compose. Make sure you have Docker installed on your machine.
+### Production (Docker Compose)
 
 1. Clone the repository:
 
    ```bash
-   git clone
-   ```
-
-2. Navigate to the project directory:
-   ```bash
+   git clone https://github.com/souhaib-benbouzid/genome_lens.git
    cd genome_lens
    ```
-3. Create a `.env.prod` file in both the frontend and backend directories by copying the provided `.env.example` and adjusting the values as needed:
+
+2. Copy and configure environment files:
 
    ```bash
    cp frontend/.env.example frontend/.env.prod
    cp backend/.env.example backend/.env.prod
    ```
 
-4. Start the application using Docker Compose:
+3. Build and start:
+
    ```bash
-    docker-compose -f docker-compose.prod.yml up --build
+   docker-compose -f docker-compose.prod.yml up --build
    ```
-   This will build the Docker images for both the backend and frontend, and start the containers. The frontend will be accessible at `http://localhost:80`.
-   THE BACKEND API WILL IS NOT EXPOSED TO THE HOST IN PRODUCTION MODE FOR SECURITY REASONS. IT IS ONLY ACCESSIBLE TO THE FRONTEND CONTAINER.
 
-## Running in Development Mode
+   The app is available at `http://localhost:80`. The backend API is **not** exposed to the host — it is only reachable from inside the Docker network by the nginx frontend container.
 
-To run the application in development mode, you can use the provided `docker-compose.dev.yml` file. This setup allows for hot-reloading of both the backend and frontend code.
+### Development (hot-reload)
 
-1. Create a `.env` file in both the frontend and backend directories by copying the provided `.env.example` and adjusting the values as needed:
+1. Copy dev environment files:
 
    ```bash
    cp frontend/.env.example frontend/.env
    cp backend/.env.example backend/.env
    ```
 
-2. Start the application in development mode:
+2. Start with hot-reloading:
+
    ```bash
    docker-compose -f docker-compose.dev.yml up --build
    ```
-   This will build the Docker images for both the backend and frontend, and start the containers with hot-reloading enabled. The frontend will be accessible at `http://localhost:8080` and the backend API will be accessible at `http://localhost:8000`.
+
+   | Service                      | URL                         |
+   | ---------------------------- | --------------------------- |
+   | Frontend (Rspack dev server) | http://localhost:8080       |
+   | Backend API (Uvicorn)        | http://localhost:8000       |
+   | Swagger UI                   | http://localhost:8000/docs  |
+   | ReDoc                        | http://localhost:8000/redoc |
+
+---
 
 ## Contributing
 

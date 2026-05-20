@@ -27,7 +27,7 @@ GenomeLens is a modular, scalable web application for browsing, filtering, searc
 - Single RTK Query API client (`genomeLensApi`) covers all backend endpoints with automatic caching
 - Redux Toolkit slice manages UI state (selected gene, active tab)
 - SQLite database seeded from `genes_human.csv` via `seed.py`; swappable to PostgreSQL with one config change
-- SQLite indexes on `biotype`, `chromosome`, and `gene_symbol` for fast filtering at scale
+- SQLite indexes on `biotype`, `chromosome`, `gene_symbol`, and `name` for fast filtering and search at scale
 - Centralized structured logging configured once at startup via `app/logging_config.py`; all modules use `logging.getLogger(__name__)`
 - GTEx proxy errors are logged server-side with full detail; only a sanitized message is returned to the client
 
@@ -133,9 +133,13 @@ GET /api/v1/genes
   ?chromosome=   # filter by chromosome (e.g. "X", "7")
   ?sort_by=      # column to sort by (e.g. "symbol", "chromosome")
   ?order=        # asc | desc
-  ?page=         # page number (1-based)
-  ?page_size=    # results per page (default 50)
-Response: { items: Gene[], total: number, page: number, page_size: number, pages: number }
+  ?offset=       # offset for pagination (default 0)
+  ?limit=        # results per page (default 50, max 200)
+Response: { items: Gene[], total: number, offset: number, limit: number, has_more: boolean }
+          # has_more = true when (offset + len(items)) < total
+          # used by the virtualized table to decide whether to fetch the next window
+          # sort_by must be one of: ensembl_id, gene_symbol, name, biotype, chromosome,
+          #                         seq_region_start, seq_region_end — invalid values → 422
 
 # Single gene detail
 GET /api/v1/genes/{ensembl_id}
@@ -179,7 +183,7 @@ genome_lens/
 │   │   ├── config.py            # pydantic-settings: DB URL, CORS origins, host/port, GTEx base URL
 │   │   ├── database.py          # SQLAlchemy engine, SessionLocal, Base
 │   │   ├── models.py            # ORM model: Gene table
-│   │   ├── schemas.py           # Pydantic schemas: GeneOut, PagedResponse, ExpressionPoint, DifferentialResult
+│   │   ├── schemas.py           # Pydantic schemas: GeneOut, VirtualizedResponse, ExpressionPoint, DifferentialResult
 │   │   ├── crud.py              # DB queries: filter, sort, paginate — typed with ColumnElement
 │   │   ├── logging_config.py    # Centralized logging setup (call once at startup)
 │   │   ├── routers/
@@ -213,7 +217,7 @@ genome_lens/
 │   │   │           ├── DifferentialTab.tsx   # Volcano plot — RTK Query → FastAPI/PyDESeq2
 │   │   │           └── ExternalLinksTab.tsx  # Links to NCBI, Ensembl, UniProt, mygene.info
 │   │   ├── types/
-│   │   │   └── gene.ts                   # Gene interface, FilterParams, PagedResponse
+│   │   │   └── gene.ts                   # Gene interface, FilterParams, VirtualizedResponse
 │   │   ├── App.tsx                       # MantineProvider + Redux Provider + layout
 │   │   └── main.tsx
 │   ├── tests/
@@ -253,7 +257,7 @@ genome_lens/
 
 ### Backend
 
-- SQLite indexes on `biotype`, `chromosome`, `gene_symbol` for fast filtering
+- SQLite indexes on `biotype`, `chromosome`, `gene_symbol`, `name` for fast filtering and ILIKE search
 - All filtering/sorting/pagination done in SQL — zero in-memory row processing
 - Bulk CSV seeding in batches of 1 000 rows for fast initial load
 

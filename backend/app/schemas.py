@@ -16,14 +16,23 @@ class GeneOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class PagedResponse(BaseModel):
-    """Generic paginated response envelope."""
+class VirtualizedResponse(BaseModel):
+    """Paginated response envelope for virtualized / infinite-scroll tables.
+
+    Fields
+    ------
+    items     : rows for the requested window
+    total     : total rows matching the current filters (for scrollbar sizing)
+    offset    : first row index of this window
+    limit     : requested window size
+    has_more  : True when there are rows beyond the current window
+    """
 
     items: list[GeneOut]
     total: int
-    page: int
-    page_size: int
-    pages: int
+    limit: int
+    offset: int
+    has_more: bool
 
 
 class ExpressionPoint(BaseModel):

@@ -1,4 +1,3 @@
-import math
 from typing import Literal
 
 from sqlalchemy import func, or_, select
@@ -6,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import ColumnElement
 
 from app.models import Gene
-from app.schemas import GeneOut, PagedResponse
+from app.schemas import GeneOut, VirtualizedResponse
 
 SORTABLE_COLUMNS: dict[str, ColumnElement] = {
     "ensembl_id": Gene.ensembl_id,
@@ -27,9 +26,9 @@ def get_genes(
     chromosome: str | None = None,
     sort_by: str = "gene_symbol",
     order: Literal["asc", "desc"] = "asc",
-    page: int = 1,
-    page_size: int = 50,
-) -> PagedResponse:
+    limit: int = 50,
+    offset: int = 0,
+) -> VirtualizedResponse:
     query = select(Gene)
 
     # --- Filters ---
@@ -60,27 +59,32 @@ def get_genes(
     query = query.order_by(sort_expr)
 
     # --- Pagination ---
-    query = query.offset((page - 1) * page_size).limit(page_size)
+    query = query.offset(offset).limit(limit)
 
     genes = db.execute(query).scalars().all()
     items = [GeneOut.model_validate(gene) for gene in genes]
 
-    return PagedResponse(
+    return VirtualizedResponse(
         items=items,
         total=total,
-        page=page,
-        page_size=page_size,
-        pages=math.ceil(total / page_size) if total else 0,
+        offset=offset,
+        limit=limit,
+        has_more=(offset + len(items)) < total,
     )
 
 
 def get_gene_by_ensembl(db: Session, ensembl_id: str) -> Gene | None:
-    return db.execute(select(Gene).where(Gene.ensembl_id == ensembl_id)).scalar_one_or_none()
+    return db.execute(
+        select(Gene).where(Gene.ensembl_id == ensembl_id)
+    ).scalar_one_or_none()
 
 
 def get_distinct_biotypes(db: Session) -> list[str]:
     rows = db.execute(
-        select(Gene.biotype).distinct().where(Gene.biotype.isnot(None)).order_by(Gene.biotype)
+        select(Gene.biotype)
+        .distinct()
+        .where(Gene.biotype.isnot(None))
+        .order_by(Gene.biotype)
     ).scalars()
     return list(rows)
 
@@ -89,6 +93,7 @@ def get_distinct_chromosomes(db: Session) -> list[str]:
     rows = db.execute(
         select(Gene.chromosome).distinct().where(Gene.chromosome.isnot(None))
     ).scalars()
+
     def chrom_sort_key(c: str) -> tuple:
         if c.isdigit():
             return (0, int(c), "")

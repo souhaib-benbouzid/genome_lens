@@ -17,7 +17,9 @@ class Gene(Base):
     seq_region_end: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
 
-# Composite indexes for the most common filter combinations
+# Indexes for filter and sort columns used by the virtualized table
 Index("ix_genes_biotype", Gene.biotype)
 Index("ix_genes_chromosome", Gene.chromosome)
 Index("ix_genes_symbol", Gene.gene_symbol)
+# name is queried with ILIKE in the search path — index speeds up prefix scans
+Index("ix_genes_name", Gene.name)
