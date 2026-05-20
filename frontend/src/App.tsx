@@ -1,5 +1,4 @@
 import banner from '@/assets/banner.png';
-import './App.css';
 
 function App() {
   return (
@@ -10,7 +9,7 @@ function App() {
           src={banner}
           alt="GenomeLens banner"
           className="app-banner"
-          width={450}
+          width={100}
         />
         <p>Browse, Filter, Search and Visualize genomes and more.</p>
       </main>

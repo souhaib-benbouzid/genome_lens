@@ -24,6 +24,7 @@ export default defineConfig({
       },
       {
         test: /\.css$/,
+        use: ['postcss-loader'],
         type: 'css/auto',
       },
       {
@@ -56,7 +57,7 @@ export default defineConfig({
   ],
   devServer: {
     host: 'localhost',
-      hot: true,
+    hot: true,
     liveReload: true,
     historyApiFallback: true,
     port: process.env.FRONTEND_PORT

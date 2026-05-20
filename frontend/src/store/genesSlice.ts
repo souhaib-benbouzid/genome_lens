@@ -1,20 +1,26 @@
-import { ActiveTab, FilterParams, Gene, SortOrder } from '@/types/gene';
+import {
+  ActiveTab,
+  FilterParams,
+  Gene,
+  SortableColumn,
+  SortOrder,
+} from '@/types/gene';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-interface initialState {
+interface GenesState {
   selectedGene: Gene | null;
-  page: number;
-  pageSize: number;
-  sortBy: Omit<keyof Gene, 'id'>;
+  offset: number;
+  limit: number;
+  sortBy: SortableColumn;
   activeTab: ActiveTab;
   order: SortOrder;
   filters: FilterParams;
 }
 
-const initialState: initialState = {
+const initialState: GenesState = {
   selectedGene: null,
-  page: 1,
-  pageSize: 20,
+  offset: 0,
+  limit: 50,
   sortBy: 'gene_symbol',
   activeTab: 'genomic',
   order: 'asc',
@@ -27,7 +33,7 @@ const initialState: initialState = {
 
 const genesSlice = createSlice({
   name: 'genes',
-  initialState: initialState,
+  initialState,
   reducers: {
     setSelectedGene(state, action: PayloadAction<Gene | null>) {
       state.selectedGene = action.payload;
@@ -40,27 +46,30 @@ const genesSlice = createSlice({
 
     setFilters(state, action: PayloadAction<Partial<FilterParams>>) {
       state.filters = { ...state.filters, ...action.payload };
-      state.page = 1;
+      // Reset to the first window whenever filters change
+      state.offset = 0;
     },
 
-    setPage(state, action: PayloadAction<number>) {
-      state.page = action.payload;
+    setOffset(state, action: PayloadAction<number>) {
+      state.offset = action.payload;
     },
-    setPageSize(state, action: PayloadAction<number>) {
-      state.pageSize = action.payload;
-      state.page = 1;
+
+    setLimit(state, action: PayloadAction<number>) {
+      state.limit = action.payload;
+      state.offset = 0;
     },
 
     setSort(
       state,
       action: PayloadAction<{
-        sortBy: Omit<keyof Gene, 'id'>;
+        sortBy: SortableColumn;
         order: SortOrder;
       }>,
     ) {
       state.sortBy = action.payload.sortBy;
       state.order = action.payload.order;
-      state.page = 1;
+      // Reset to the first window whenever sort changes
+      state.offset = 0;
     },
   },
 });
@@ -69,8 +78,8 @@ export const {
   setActiveTab,
   setSelectedGene,
   setFilters,
-  setPage,
-  setPageSize,
+  setOffset,
+  setLimit,
   setSort,
 } = genesSlice.actions;
 

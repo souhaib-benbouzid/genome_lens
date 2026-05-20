@@ -9,6 +9,15 @@ export interface Gene {
   seq_region_end: number | null;
 }
 
+export type SortableColumn =
+  | 'ensembl_id'
+  | 'gene_symbol'
+  | 'name'
+  | 'biotype'
+  | 'chromosome'
+  | 'seq_region_start'
+  | 'seq_region_end';
+
 export interface FilterParams {
   search: string;
   biotype: string | null;
@@ -16,10 +25,10 @@ export interface FilterParams {
 }
 
 export interface GeneQueryParams extends FilterParams {
-  sortBy: Omit<keyof Gene, 'id'>;
+  sortBy: SortableColumn;
   order: 'asc' | 'desc';
-  page: number;
-  pageSize: number;
+  offset: number;
+  limit: number;
 }
 
 export type SortOrder = 'asc' | 'desc';
@@ -31,10 +40,13 @@ export type ActiveTab =
   | 'differential'
   | 'external-links';
 
-export interface ExpressionPointResponse {
+export interface ExpressionPoint {
   tissue: string;
   median_tpm: number;
 }
+
+/** The /genes/{id}/expression endpoint returns a list. */
+export type ExpressionPointResponse = ExpressionPoint[];
 
 export interface DifferentialQueryParams {
   genA: string;
@@ -50,12 +62,12 @@ export interface DifferentialResultResponse {
   significant: boolean;
 }
 
-export interface PagedResponse<T> {
+export interface VirtualizedResponse<T> {
   items: T[];
   total: number;
-  page: number;
-  page_size: number;
-  pages: number;
+  offset: number;
+  limit: number;
+  has_more: boolean;
 }
 
 export type BiotypesResponse = string[];

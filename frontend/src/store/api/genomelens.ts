@@ -6,7 +6,7 @@ import {
   ExpressionPointResponse,
   Gene,
   GeneQueryParams,
-  PagedResponse,
+  VirtualizedResponse,
 } from '@/types/gene';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
@@ -17,10 +17,10 @@ export const genomeLensApi = createApi({
   }),
   keepUnusedDataFor: 60,
   endpoints: (builder) => ({
-    getGenes: builder.query<PagedResponse<Gene>, GeneQueryParams>({
+    getGenes: builder.query<VirtualizedResponse<Gene>, GeneQueryParams>({
       query: ({
-        page,
-        pageSize,
+        limit,
+        offset,
         sortBy,
         order,
         biotype,
@@ -29,8 +29,8 @@ export const genomeLensApi = createApi({
       }) => ({
         url: '/genes',
         params: {
-          page,
-          page_size: pageSize,
+          limit,
+          offset,
           sort_by: sortBy,
           order,
           ...(search && { search }),
