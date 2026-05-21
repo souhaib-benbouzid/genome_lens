@@ -128,7 +128,7 @@ export function GenomicTab() {
       gosRef.current?.api.zoomTo(
         'gene-track',
         position,
-        5000, // bp padding either side of the gene
+        2000, // bp padding either side of the gene
         800, // animation duration ms
       );
     }, 200);
