@@ -14,7 +14,7 @@ const initialState: GenesState = {
   selectedGene: null,
   offset: 0,
   limit: 50,
-  sorting: [{ id: 'gene_symbol', desc: false }],
+  sorting: [{ id: 'gene_symbol', desc: true }],
   activeTab: 'genomic',
   filters: {
     search: '',
