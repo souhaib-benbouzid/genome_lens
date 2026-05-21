@@ -44,16 +44,19 @@ export function Layout({ leftPanelContent, rightPanelContent }: LayoutProps) {
     (e.target as HTMLDivElement).setPointerCapture(e.pointerId);
   }, []);
 
-  const onPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    if (!dragging.current) return;
-    setLeftWidth((prev) =>
-      Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, prev + e.movementX)),
-    );
-  }, []);
+  const onPointerMove = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (!dragging.current) return;
+      setLeftWidth((prev) =>
+        Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, prev + e.movementX)),
+      );
+    },
+    [setLeftWidth, dragging],
+  );
 
   const onPointerUp = useCallback(() => {
     dragging.current = false;
-  }, []);
+  }, [dragging]);
 
   const onDrawerClose = useCallback(
     () => dispatch(setSelectedGene(null)),
