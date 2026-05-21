@@ -73,7 +73,7 @@ GenomeLens is a modular, scalable web application for browsing, filtering, searc
 
 ## High-Level Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────────┐
 │                     Frontend                        │
 │                                                     │
@@ -101,21 +101,39 @@ GenomeLens is a modular, scalable web application for browsing, filtering, searc
 
 ## Layout
 
-```
+### Desktop (> 768 px)
+
+```text
 ┌─────────────────────────┬──────────────────────────────────────┐
 │                         │  Selected gene header + metadata      │
 │   GeneTable             ├──────────────────────────────────────┤
 │   (mantine-react-table) │  [Genomic][Expression][Protein]       │
 │                         │  [Differential][External Links]       │
-│   Filters / Search bar  ├──────────────────────────────────────┤
-│   (Mantine inputs)      │                                      │
+│   Search + Biotype/Chr  ├──────────────────────────────────────┤
+│   filter toolbar        │                                      │
 │                         │  <Active tab content renders here>   │
 │                         │                                      │
 └─────────────────────────┴──────────────────────────────────────┘
+         ↑ resizable drag divider
 ```
 
+### Mobile / Tablet (≤ 768 px)
+
+```text
+┌────────────────────────────────┐
+│  GeneTable (full width)        │
+│  Search + filter toolbar       │
+└────────────────────────────────┘
+         ↓ row click
+┌────────────────────────────────┐  ← Mantine Drawer (bottom, 85% height)
+│  Gene header + Mantine Tabs    │
+│  [Genomic][Expr][Protein]…     │
+└────────────────────────────────┘
+```
+
+- Breakpoint is read from `theme.breakpoints.sm` (`48em` / 768 px) via `useMantineTheme()` — no hard-coded pixel values
 - Clicking a table row dispatches `setSelectedGene` to the Redux store
-- The right panel shows the selected gene's metadata and a **Mantine Tabs** panel
+- On desktop the right panel shows detail inline; on mobile it opens a bottom Drawer
 - Adding a new visualization = adding one new tab file, zero layout changes
 - Every tab gets its data exclusively from the FastAPI backend via RTK Query
 
@@ -125,7 +143,7 @@ GenomeLens is a modular, scalable web application for browsing, filtering, searc
 
 The frontend communicates **only** with the FastAPI backend. All data fetching, filtering, sorting, aggregation, and enrichment happens server-side.
 
-```
+```http
 # Gene list — paginated, filtered, sorted
 GET /api/v1/genes
   ?search=       # full-text search across symbol, name, ensembl id
@@ -169,7 +187,7 @@ All filtering, sorting, aggregation, and external API proxying is handled **in t
 
 ## File Structure
 
-```
+```text
 genome_lens/
 ├── genes_human.csv              # Source data (semicolon-delimited, ~58k rows)
 ├── ARCHITECTURE.md
@@ -199,33 +217,51 @@ genome_lens/
 │
 ├── frontend/
 │   ├── src/
+│   │   ├── App.tsx                           # MantineProvider + Redux Provider + Layout
+│   │   ├── main.tsx
 │   │   ├── store/
-│   │   │   ├── index.ts                  # Redux configureStore
-│   │   │   ├── genesSlice.ts             # selectedGene, UI state (active tab, etc.)
+│   │   │   ├── index.ts                      # Redux configureStore
+│   │   │   ├── genesSlice.ts                 # selectedGene, activeTab, filters, sorting, offset/limit
+│   │   │   ├── hook.ts                       # Typed useAppDispatch / useAppSelector
 │   │   │   └── api/
-│   │   │       └── genomeLensApi.ts      # RTK Query createApi — all /api/v1/* endpoints
+│   │   │       ├── genomelens.ts             # RTK Query createApi — all /api/v1/* endpoints
+│   │   │       └── mygene.ts                 # RTK Query createApi — mygene.info enrichment
 │   │   ├── components/
+│   │   │   ├── Layout/
+│   │   │   │   ├── Layout.tsx                # Responsive shell: split-panel (desktop) / Drawer (mobile)
+│   │   │   │   └── Layout.module.css
+│   │   │   ├── Navbar/
+│   │   │   │   ├── Navbar.tsx                # Logo, version badge, dark/light toggle
+│   │   │   │   └── Navbar.module.css
 │   │   │   ├── GeneTable/
-│   │   │   │   ├── GeneTable.tsx         # mantine-react-table, data via RTK Query
-│   │   │   │   └── GeneTable.test.tsx
-│   │   │   └── DetailPanel/
-│   │   │       ├── DetailPanel.tsx       # Mantine Tabs wrapper + gene metadata header
-│   │   │       └── tabs/
-│   │   │           ├── GenomicTab.tsx        # Gosling.js — zooms to chromosome locus
-│   │   │           ├── ExpressionTab.tsx     # ECharts violin/box — RTK Query → FastAPI
-│   │   │           ├── ProteinTab.tsx        # SwissBioPics subcellular location embed
-│   │   │           ├── DifferentialTab.tsx   # Volcano plot — RTK Query → FastAPI/PyDESeq2
-│   │   │           └── ExternalLinksTab.tsx  # Links to NCBI, Ensembl, UniProt, mygene.info
-│   │   ├── types/
-│   │   │   └── gene.ts                   # Gene interface, FilterParams, VirtualizedResponse
-│   │   ├── App.tsx                       # MantineProvider + Redux Provider + layout
-│   │   └── main.tsx
+│   │   │   │   ├── GeneTable.tsx             # mantine-react-table with row virtualisation
+│   │   │   │   ├── GeneTableToolbar.tsx      # Search + biotype/chromosome filter selects
+│   │   │   │   ├── columns.tsx               # MRT column definitions
+│   │   │   │   ├── GeneTable.module.css
+│   │   │   │   └── hooks/
+│   │   │   │       ├── useGeneTable.ts       # Composes sub-hooks; returns all table state
+│   │   │   │       ├── useGeneRows.ts        # Infinite-scroll windowing via RTK Query
+│   │   │   │       ├── useGeneSearch.ts      # Debounced search → Redux setFilters
+│   │   │   │       └── useGeneSorting.ts     # Sorting state → Redux setSorting
+│   │   │   ├── DetailPanel/
+│   │   │   │   ├── DetailPanel.tsx           # Gene header + Mantine Tabs (lazy-loaded)
+│   │   │   │   └── tabs/
+│   │   │   │       ├── GenomicTab.tsx        # Gosling.js — zooms to chromosome locus
+│   │   │   │       ├── ExpressionTab.tsx     # Tissue expression chart (placeholder)
+│   │   │   │       ├── ProteinTab.tsx        # Protein info via mygene.info RTK Query
+│   │   │   │       ├── DifferentialTab.tsx   # Differential expression (placeholder)
+│   │   │   │       ├── ExternalLinksTab.tsx  # Links to Ensembl, NCBI, UniProt, GTEx, …
+│   │   │   │       └── GoslingErrorBoundary.tsx
+│   │   │   └── ui/
+│   │   │       ├── BiotypeTag.tsx            # Colour-coded badge per biotype
+│   │   │       └── ChromosomeTag.tsx         # Coloured swatch + chr label
+│   │   └── types/
+│   │       └── gene.ts                       # Gene, FilterParams, SortingState, ActiveTab, …
 │   ├── tests/
-│   │   └── e2e/                          # Playwright E2E specs
-│   │       ├── gene-table.spec.ts
-│   │       ├── gene-filter.spec.ts
-│   │       └── gene-detail.spec.ts
-│   ├── playwright.config.ts
+│   │   └── index.test.tsx
+│   ├── rspack.config.ts
+│   ├── rstest.config.ts
+│   ├── tsconfig.json
 │   ├── package.json
 │   └── README.md
 ```
@@ -255,23 +291,27 @@ genome_lens/
 
 ## Performance
 
-### Backend
+### Backend Performance
 
 - SQLite indexes on `biotype`, `chromosome`, `gene_symbol`, `name` for fast filtering and ILIKE search
 - All filtering/sorting/pagination done in SQL — zero in-memory row processing
 - Bulk CSV seeding in batches of 1 000 rows for fast initial load
 
-### Frontend
+### Frontend Performance
 
 - RTK Query caches API responses per cache key — no redundant network calls for identical filter/sort/page combinations
-- `React.memo` and `useCallback` on heavy components (`GeneTable`, `ExpressionChart`)
-- `mantine-react-table` uses virtualization for large row counts
+- `useCallback` on all pointer event handlers in `Layout` and table row callbacks
+- `useMemo` on `leftPanelStyle` and tab header/item arrays; `DRAWER_STYLES` extracted as a module-level constant to avoid object allocation on every render
+- `React.lazy` + `Suspense` for all five detail panel tabs — each tab's bundle is only fetched when first opened
+- `mantine-react-table` row virtualisation — only visible rows are in the DOM
+- Per-icon `@tabler/icons-react` imports (`dist/esm/icons/Icon*.mjs`) so the bundler tree-shakes the full icon set
+- Rspack `splitChunks` separates Mantine, Gosling.js, and application code into distinct async chunks
 
 ---
 
 ## Data Flow Summary
 
-```
+```text
 RTK Query → FastAPI /api/v1/genes → SQLAlchemy → SQLite
     → GeneTable (filter / sort / paginate — all server-side)
     → row click → Redux setSelectedGene()
@@ -298,7 +338,7 @@ RTK Query → FastAPI /api/v1/genes → SQLAlchemy → SQLite
 - The backend listens on port 8000, but is not exposed publicly — only accessible from the frontend container
 - SQLite database is stored in a Docker volume for persistence across container restarts
 
-```
+```text
 # -- Request flow in production -- #
 
 Browser Request
