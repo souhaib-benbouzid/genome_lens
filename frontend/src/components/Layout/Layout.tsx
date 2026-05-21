@@ -1,16 +1,18 @@
+import { IconSeparatorVertical } from '@tabler/icons-react';
 import { useCallback, useRef, useState } from 'react';
 import { Navbar } from '../Navbar/Navbar';
 import {
   divider,
+  dividerHandle,
   leftPanel,
   panels,
   rightPanel,
   root,
 } from './Layout.module.css';
 
-const MIN_WIDTH = 460;
+const MIN_WIDTH = 680;
 const MAX_WIDTH = 1220;
-const DEFAULT_WIDTH = 560;
+const DEFAULT_WIDTH = 680;
 
 interface LayoutProps {
   leftPanelContent: React.ReactNode;
@@ -56,7 +58,14 @@ export function Layout({ leftPanelContent, rightPanelContent }: LayoutProps) {
           role="separator"
           aria-label="Resize panels"
           title="Drag to resize"
-        />
+        >
+          <span className={dividerHandle} aria-hidden="true">
+            <IconSeparatorVertical
+              size={28}
+              color="var(--mantine-color-violet-6)"
+            />
+          </span>
+        </div>
         <div className={rightPanel}>{rightPanelContent}</div>
       </div>
     </div>

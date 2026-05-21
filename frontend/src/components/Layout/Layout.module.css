@@ -25,24 +25,55 @@
 }
 
 .divider {
-  width: 5px;
+  width: 16px;
   flex-shrink: 0;
   cursor: col-resize;
-  background: var(--mantine-color-default-border);
-  transition: background 120ms ease;
   position: relative;
   user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.divider:hover,
-.divider:active {
-  background: var(--mantine-color-violet-6);
+.divider::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  top: 0;
+  height: calc(50% - 20px);
+  background: var(--mantine-color-default-border);
+  transition: background 120ms ease;
 }
 
 .divider::after {
   content: '';
   position: absolute;
-  inset: 0 -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  bottom: 0;
+  height: calc(50% - 20px);
+  background: var(--mantine-color-default-border);
+  transition: background 120ms ease;
+}
+
+.divider:hover::before,
+.divider:active::before,
+.divider:hover::after,
+.divider:active::after {
+  background: var(--mantine-color-violet-6);
+}
+
+.dividerHandle {
+  position: relative;
+  z-index: 1;
+  color: var(--mantine-color-gray-3);
+  font-size: 14px;
+  line-height: 1;
+  font-weight: 700;
+  pointer-events: none;
 }
 
 .rightPanel {
