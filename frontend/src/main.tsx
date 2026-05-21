@@ -5,18 +5,15 @@ import '@mantine/dates/styles.css';
 import { Notifications } from '@mantine/notifications';
 import '@mantine/notifications/styles.css';
 import 'mantine-react-table/styles.css';
-import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 import App from './App.tsx';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  <React.StrictMode>
-    <MantineProvider>
-      <Notifications />
-      <Provider store={store}>
-        <App />
-      </Provider>
-    </MantineProvider>
-  </React.StrictMode>,
+  <MantineProvider>
+    <Notifications />
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </MantineProvider>,
 );

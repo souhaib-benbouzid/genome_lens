@@ -68,4 +68,24 @@ export const geneColumns: MRT_ColumnDef<Gene>[] = [
       </Text>
     ),
   },
+  {
+    accessorKey: 'seq_region_start',
+    header: 'Start',
+    size: 100,
+    Cell: ({ cell }) => (
+      <Text fz="xs" c="dimmed">
+        {cell.getValue<number | null>()?.toLocaleString() ?? 'N/A'}
+      </Text>
+    ),
+  },
+  {
+    accessorKey: 'seq_region_end',
+    header: 'End',
+    size: 100,
+    Cell: ({ cell }) => (
+      <Text fz="xs" c="dimmed">
+        {cell.getValue<number | null>()?.toLocaleString() ?? 'N/A'}
+      </Text>
+    ),
+  },
 ];
