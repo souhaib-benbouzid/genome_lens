@@ -1,17 +1,62 @@
 import logo from '@/assets/favicon-32x32.png';
-import { Group, Image, Text } from '@mantine/core';
+import {
+  ActionIcon,
+  Badge,
+  Group,
+  Image,
+  Text,
+  useComputedColorScheme,
+  useMantineColorScheme,
+} from '@mantine/core';
+import { IconMoon, IconSun } from '@tabler/icons-react';
 import { header } from './Navbar.module.css';
+
 export function Navbar() {
+  const { setColorScheme } = useMantineColorScheme();
+  const computed = useComputedColorScheme('dark');
+
   return (
     <header className={header}>
-      <Image src={logo} alt="GenomeLens logo" width={24} height={24} />
-      <Text fw={700} size="sm" style={{ letterSpacing: '0.05em' }}>
-        GenomeLens
-      </Text>
-      <Group gap={4} ml="auto">
-        <Text size="xs" c="gray.5">
-          v0.1.0
+      <Group gap="xs" align="center">
+        <Image
+          src={logo}
+          alt="GenomeLens logo"
+          width={22}
+          height={22}
+          style={{ opacity: 0.9 }}
+        />
+        <Text
+          fw={800}
+          size="sm"
+          style={{
+            letterSpacing: '0.08em',
+            background: 'linear-gradient(90deg, #a78bfa, #818cf8)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}
+        >
+          GENOMELENS
         </Text>
+      </Group>
+      <Group gap="xs" ml="auto" align="center">
+        <Badge
+          size="xs"
+          variant="light"
+          color="violet"
+          radius="sm"
+          style={{ letterSpacing: '0.04em', fontWeight: 600 }}
+        >
+          v0.2.0
+        </Badge>
+        <ActionIcon
+          variant="subtle"
+          color="gray"
+          size="sm"
+          aria-label="Toggle colour scheme"
+          onClick={() => setColorScheme(computed === 'dark' ? 'light' : 'dark')}
+        >
+          {computed === 'dark' ? <IconSun size={15} /> : <IconMoon size={15} />}
+        </ActionIcon>
       </Group>
     </header>
   );

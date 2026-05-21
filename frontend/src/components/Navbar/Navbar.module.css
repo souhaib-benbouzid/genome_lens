@@ -2,10 +2,11 @@
   display: flex;
   align-items: center;
   gap: var(--mantine-spacing-xs);
-  padding: 0 var(--mantine-spacing-md);
+  padding: 0 var(--mantine-spacing-lg);
   height: 48px;
-  background: var(--mantine-color-dark-8);
+  background: var(--mantine-color-dark-9);
   color: var(--mantine-color-white);
   flex-shrink: 0;
-  border-bottom: 1px solid var(--mantine-color-dark-6);
+  border-bottom: 1px solid var(--mantine-color-dark-7);
+  box-shadow: 0 1px 0 0 rgba(139, 92, 246, 0.15);
 }
