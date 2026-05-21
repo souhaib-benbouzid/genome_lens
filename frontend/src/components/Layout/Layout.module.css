@@ -9,8 +9,8 @@
 
 .panels {
   grid-row: 2;
-  display: grid;
-  grid-template-columns: 1fr 1.5fr;
+  display: flex;
+  flex-direction: row;
   overflow: hidden;
   min-height: 0;
 }
@@ -20,7 +20,29 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
-  border-right: 1px solid var(--mantine-color-dark-2);
+  flex-shrink: 0;
+  background: var(--mantine-color-body);
+}
+
+.divider {
+  width: 5px;
+  flex-shrink: 0;
+  cursor: col-resize;
+  background: var(--mantine-color-default-border);
+  transition: background 120ms ease;
+  position: relative;
+  user-select: none;
+}
+
+.divider:hover,
+.divider:active {
+  background: var(--mantine-color-violet-6);
+}
+
+.divider::after {
+  content: '';
+  position: absolute;
+  inset: 0 -4px;
 }
 
 .rightPanel {
@@ -28,5 +50,6 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
-  padding: var(--mantine-spacing-xs);
+  flex: 1;
+  background: var(--mantine-color-body);
 }
