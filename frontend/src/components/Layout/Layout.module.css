@@ -21,6 +21,7 @@
   flex-direction: column;
   min-height: 0;
   flex-shrink: 0;
+  flex: 1;
   background: var(--mantine-color-body);
 }
 

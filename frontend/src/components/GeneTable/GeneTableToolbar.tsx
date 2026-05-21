@@ -1,7 +1,7 @@
 import type { AppDispatch } from '@/store';
 import { setFilters } from '@/store/genesSlice';
 import type { FilterParams } from '@/types/gene';
-import { ActionIcon, Group, Select, Stack, TextInput } from '@mantine/core';
+import { ActionIcon, Flex, Select, Stack, TextInput } from '@mantine/core';
 import IconSearch from '@tabler/icons-react/dist/esm/icons/IconSearch.mjs';
 import IconX from '@tabler/icons-react/dist/esm/icons/IconX.mjs';
 
@@ -23,7 +23,7 @@ export function GeneTableToolbar({
   dispatch,
 }: GeneTableToolbarProps) {
   return (
-    <Stack gap="xs" px="sm" pt="sm" pb="xs">
+    <Stack gap="xs" p="sm">
       <TextInput
         size="xs"
         leftSection={<IconSearch size={14} />}
@@ -43,7 +43,7 @@ export function GeneTableToolbar({
         value={rawSearch}
         onChange={(e) => onSearchChange(e.currentTarget.value)}
       />
-      <Group gap="xs">
+      <Flex wrap="wrap" gap="xs" direction={{ base: 'column', sm: 'row' }}>
         <Select
           size="xs"
           placeholder="Biotype"
@@ -52,19 +52,21 @@ export function GeneTableToolbar({
           data={biotypes}
           value={filters.biotype}
           onChange={(v) => dispatch(setFilters({ biotype: v }))}
-          style={{ flex: 1 }}
+          flex={1}
+          style={{ minWidth: 0 }}
         />
         <Select
           size="xs"
-          placeholder="Chr"
+          placeholder="Chromosome"
           clearable
           searchable
+          flex={1}
           data={chromosomes}
           value={filters.chromosome}
           onChange={(v) => dispatch(setFilters({ chromosome: v }))}
-          style={{ flex: 1 }}
+          style={{ minWidth: 0 }}
         />
-      </Group>
+      </Flex>
     </Stack>
   );
 }
