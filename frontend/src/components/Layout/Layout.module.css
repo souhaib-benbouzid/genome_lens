@@ -1,26 +1,32 @@
-.body {
+.root {
+  display: grid;
+  grid-template-rows: 48px 1fr;
+  height: 100vh;
+  overflow: hidden;
   font-family: var(--mantine-font-family);
   background-color: var(--mantine-color-body);
-  color: var(--mantine-color-dark);
-  height: 100vh;
-  max-height: 100vh;
 }
 
-.wrapper {
-  display: flex;
-  flex-direction: row;
-  height: calc(100vh - 48px);
-}
-
-.leftPanel {
-  flex: 1;
-  border-right: 2px solid var(--mantine-color-dark-1);
-  padding: var(--mantine-spacing-xs);
-  overflow-y: auto;
+.panels {
+  grid-row: 2;
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  overflow: hidden;
   min-height: 0;
 }
 
+.leftPanel {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: 1px solid var(--mantine-color-dark-2);
+}
+
 .rightPanel {
-  flex: 1.5;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   padding: var(--mantine-spacing-xs);
 }

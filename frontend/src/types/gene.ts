@@ -18,6 +18,15 @@ export type SortableColumn =
   | 'seq_region_start'
   | 'seq_region_end';
 
+/** Single sort entry — mirrors MRT_SortingState item */
+export interface SortItem {
+  id: SortableColumn;
+  desc: boolean;
+}
+
+/** The active sorting state — always a single-element array (one active sort) */
+export type SortingState = [SortItem] | [];
+
 export interface FilterParams {
   search: string;
   biotype: string | null;
@@ -25,13 +34,10 @@ export interface FilterParams {
 }
 
 export interface GeneQueryParams extends FilterParams {
-  sortBy: SortableColumn;
-  order: 'asc' | 'desc';
+  sorting: SortingState;
   offset: number;
   limit: number;
 }
-
-export type SortOrder = 'asc' | 'desc';
 
 export type ActiveTab =
   | 'genomic'

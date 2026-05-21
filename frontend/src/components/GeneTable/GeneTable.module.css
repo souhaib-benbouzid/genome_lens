@@ -1,0 +1,7 @@
+.selectedRow td {
+  background-color: var(--mantine-color-blue-0) !important;
+}
+
+.selectedRow:hover td {
+  background-color: var(--mantine-color-blue-1) !important;
+}

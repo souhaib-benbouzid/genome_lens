@@ -1,19 +1,12 @@
-import {
-  ActiveTab,
-  FilterParams,
-  Gene,
-  SortableColumn,
-  SortOrder,
-} from '@/types/gene';
+import { ActiveTab, FilterParams, Gene, SortingState } from '@/types/gene';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface GenesState {
   selectedGene: Gene | null;
   offset: number;
   limit: number;
-  sortBy: SortableColumn;
+  sorting: SortingState;
   activeTab: ActiveTab;
-  order: SortOrder;
   filters: FilterParams;
 }
 
@@ -21,9 +14,8 @@ const initialState: GenesState = {
   selectedGene: null,
   offset: 0,
   limit: 50,
-  sortBy: 'gene_symbol',
+  sorting: [{ id: 'gene_symbol', desc: false }],
   activeTab: 'genomic',
-  order: 'asc',
   filters: {
     search: '',
     biotype: null,
@@ -46,7 +38,6 @@ const genesSlice = createSlice({
 
     setFilters(state, action: PayloadAction<Partial<FilterParams>>) {
       state.filters = { ...state.filters, ...action.payload };
-      // Reset to the first window whenever filters change
       state.offset = 0;
     },
 
@@ -59,16 +50,8 @@ const genesSlice = createSlice({
       state.offset = 0;
     },
 
-    setSort(
-      state,
-      action: PayloadAction<{
-        sortBy: SortableColumn;
-        order: SortOrder;
-      }>,
-    ) {
-      state.sortBy = action.payload.sortBy;
-      state.order = action.payload.order;
-      // Reset to the first window whenever sort changes
+    setSorting(state, action: PayloadAction<SortingState>) {
+      state.sorting = action.payload;
       state.offset = 0;
     },
   },
@@ -80,7 +63,7 @@ export const {
   setFilters,
   setOffset,
   setLimit,
-  setSort,
+  setSorting,
 } = genesSlice.actions;
 
 export default genesSlice.reducer;

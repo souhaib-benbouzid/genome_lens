@@ -1,8 +1,8 @@
 declare const styles: {
-  readonly "body": string;
   readonly "leftPanel": string;
+  readonly "panels": string;
   readonly "rightPanel": string;
-  readonly "wrapper": string;
+  readonly "root": string;
 };
 export = styles;
 

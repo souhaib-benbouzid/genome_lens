@@ -18,26 +18,21 @@ export const genomeLensApi = createApi({
   keepUnusedDataFor: 60,
   endpoints: (builder) => ({
     getGenes: builder.query<VirtualizedResponse<Gene>, GeneQueryParams>({
-      query: ({
-        limit,
-        offset,
-        sortBy,
-        order,
-        biotype,
-        chromosome,
-        search,
-      }) => ({
-        url: '/genes',
-        params: {
-          limit,
-          offset,
-          sort_by: sortBy,
-          order,
-          ...(search && { search }),
-          ...(biotype && { biotype }),
-          ...(chromosome && { chromosome }),
-        },
-      }),
+      query: ({ limit, offset, sorting, biotype, chromosome, search }) => {
+        const sort = sorting[0];
+        return {
+          url: '/genes',
+          params: {
+            limit,
+            offset,
+            sort_by: sort?.id ?? 'gene_symbol',
+            order: sort ? (sort.desc ? 'desc' : 'asc') : 'asc',
+            ...(search && { search }),
+            ...(biotype && { biotype }),
+            ...(chromosome && { chromosome }),
+          },
+        };
+      },
     }),
     getGeneByEnsemblId: builder.query<Gene, string>({
       query: (ensemblId) => `/genes/${ensemblId}`,

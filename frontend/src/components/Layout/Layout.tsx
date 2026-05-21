@@ -1,5 +1,5 @@
 import { Navbar } from '../Navbar/Navbar';
-import { body, leftPanel, rightPanel, wrapper } from './Layout.module.css';
+import { leftPanel, panels, rightPanel, root } from './Layout.module.css';
 
 interface LayoutProps {
   leftPanelContent: React.ReactNode;
@@ -8,12 +8,12 @@ interface LayoutProps {
 
 export function Layout({ leftPanelContent, rightPanelContent }: LayoutProps) {
   return (
-    <div className={body}>
+    <div className={root}>
       <Navbar />
-      <main className={wrapper}>
+      <div className={panels}>
         <div className={leftPanel}>{leftPanelContent}</div>
         <div className={rightPanel}>{rightPanelContent}</div>
-      </main>
+      </div>
     </div>
   );
 }
