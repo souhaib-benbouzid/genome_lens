@@ -1,7 +1,17 @@
+import logo from '@/assets/favicon-512x512.png';
 import { setActiveTab } from '@/store/genesSlice';
 import { useAppDispatch, useAppSelector } from '@/store/hook';
 import { ActiveTab, Gene } from '@/types/gene';
-import { Box, Center, Stack, Tabs, Text, Title } from '@mantine/core';
+import {
+  Badge,
+  Box,
+  Center,
+  Group,
+  Stack,
+  Tabs,
+  Text,
+  Title,
+} from '@mantine/core';
 import {
   IconActivity,
   IconDna,
@@ -15,7 +25,6 @@ import { ExpressionTab } from './tabs/ExpressionTab';
 import { ExternalLinksTab } from './tabs/ExternalLinksTab';
 import { GenomicTab } from './tabs/GenomicTab';
 import { ProteinTab } from './tabs/ProteinTab';
-
 interface TabHeader {
   value: ActiveTab;
   label: string;
@@ -31,8 +40,8 @@ function EmptyState() {
   return (
     <Center h="100%" p="xl">
       <Stack align="center" gap="xs">
-        <IconDna size={48} stroke={1} color="var(--mantine-color-dimmed)" />
-        <Text c="dimmed" ta="center" size="sm">
+        <img src={logo} alt="Empty state" width={48} />
+        <Text ta="center" size="sm">
           Select a gene from the list
           <br />
           to view details
@@ -44,13 +53,40 @@ function EmptyState() {
 
 export function Header({ selectedGene }: { selectedGene: Gene }) {
   return (
-    <Box px="md" pt="md" pb="xs">
-      <Title order={4} lineClamp={1}>
-        {selectedGene.gene_symbol ?? selectedGene.ensembl_id}
-      </Title>
-      <Text size="xs" c="dimmed" truncate>
+    <Box
+      px="md"
+      pt="md"
+      pb="sm"
+      style={{
+        borderBottom: '1px solid var(--mantine-color-dark-6)',
+        borderLeft: '3px solid var(--mantine-color-violet-5)',
+      }}
+    >
+      <Group gap="xs" align="center" wrap="nowrap">
+        <Title order={4} lineClamp={1} style={{ flex: 1 }}>
+          {selectedGene.gene_symbol ?? selectedGene.ensembl_id}
+        </Title>
+        {selectedGene.biotype && (
+          <Badge
+            size="xs"
+            variant="light"
+            color="violet"
+            radius="sm"
+            style={{ flexShrink: 0 }}
+          >
+            {selectedGene.biotype}
+          </Badge>
+        )}
+      </Group>
+      <Text size="xs" c="dimmed" truncate mt={2}>
         {selectedGene.ensembl_id}
-        {selectedGene.name && ` · ${selectedGene.name}`}
+        {selectedGene.chromosome && (
+          <Text span c="dark.3">
+            {' '}
+            · chr{selectedGene.chromosome}
+          </Text>
+        )}
+        {selectedGene.name && <Text span> · {selectedGene.name}</Text>}
       </Text>
     </Box>
   );

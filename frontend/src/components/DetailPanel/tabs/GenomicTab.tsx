@@ -1,5 +1,5 @@
 import { useAppSelector } from '@/store/hook';
-import { Center, Text } from '@mantine/core';
+import { Center, Text, useMantineColorScheme } from '@mantine/core';
 import type { GoslingRef, GoslingSpec } from 'gosling.js';
 import { GoslingComponent } from 'gosling.js';
 import { useEffect, useRef } from 'react';
@@ -114,7 +114,8 @@ const SPEC: GoslingSpec = {
 export function GenomicTab() {
   const selectedGene = useAppSelector((s) => s.genes.selectedGene);
   const gosRef = useRef<GoslingRef>(null);
-
+  const { colorScheme } = useMantineColorScheme();
+  // ...
   useEffect(() => {
     const { chromosome, seq_region_start, seq_region_end } = selectedGene ?? {};
     if (!chromosome || seq_region_start == null || seq_region_end == null)
@@ -139,11 +140,17 @@ export function GenomicTab() {
   return (
     <div style={{ padding: '18px', height: '100%', overflow: 'auto' }}>
       <GoslingErrorBoundary>
-        <GoslingComponent ref={gosRef} spec={SPEC} padding={0} margin={0} />
+        <GoslingComponent
+          ref={gosRef}
+          spec={SPEC}
+          padding={0}
+          margin={0}
+          theme={colorScheme === 'dark' ? 'dark' : 'light'}
+        />
       </GoslingErrorBoundary>
       {!selectedGene && (
         <Center mt="xs">
-          <Text c="dimmed" size="xs">
+          <Text size="xs">
             Select a gene in the table to zoom to its locus.
           </Text>
         </Center>

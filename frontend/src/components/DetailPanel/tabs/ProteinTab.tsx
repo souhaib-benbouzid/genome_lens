@@ -6,7 +6,6 @@ import {
   Badge,
   Box,
   Center,
-  Divider,
   Group,
   ScrollArea,
   Skeleton,
@@ -28,35 +27,55 @@ interface ProteinDetailsProps {
   uniprotIds: string[];
 }
 
+const SectionCard = ({ children }: { children: React.ReactNode }) => (
+  <Box
+    p="sm"
+    style={{
+      background: 'var(--mantine-color-default)',
+      borderRadius: 'var(--mantine-radius-md)',
+      border: '1px solid var(--mantine-color-default-border)',
+    }}
+  >
+    {children}
+  </Box>
+);
+
+const SectionLabel = ({ children }: { children: React.ReactNode }) => (
+  <Text
+    size="xs"
+    fw={700}
+    tt="uppercase"
+    c="dimmed"
+    mb={6}
+    style={{ letterSpacing: '0.06em' }}
+  >
+    {children}
+  </Text>
+);
+
 const ProteinDetails = ({ data, ccTerms, uniprotIds }: ProteinDetailsProps) => {
   return (
     <>
-      <Divider />
-
       {/* Summary */}
       {data.summary && (
-        <Box>
-          <Text size="xs" fw={600} tt="uppercase" c="dimmed" mb={4}>
-            Function
-          </Text>
-          <Text size="sm" style={{ lineHeight: 1.6 }}>
+        <SectionCard>
+          <SectionLabel>Function</SectionLabel>
+          <Text size="sm" style={{ lineHeight: 1.7 }}>
             {data.summary}
           </Text>
-        </Box>
+        </SectionCard>
       )}
 
       {/* Subcellular localisation */}
       {ccTerms.length > 0 && (
-        <Box>
-          <Text size="xs" fw={600} tt="uppercase" c="dimmed" mb={6}>
-            Subcellular Localisation
-          </Text>
+        <SectionCard>
+          <SectionLabel>Subcellular Localisation</SectionLabel>
           <Group gap={6} wrap="wrap">
             {ccTerms.map((term) => (
               <Badge
                 key={term.id}
                 size="sm"
-                variant="light"
+                variant="dot"
                 color="violet"
                 radius="sm"
                 component="a"
@@ -69,15 +88,13 @@ const ProteinDetails = ({ data, ccTerms, uniprotIds }: ProteinDetailsProps) => {
               </Badge>
             ))}
           </Group>
-        </Box>
+        </SectionCard>
       )}
 
       {/* UniProt links */}
       {uniprotIds.length > 0 && (
-        <Box>
-          <Text size="xs" fw={600} tt="uppercase" c="dimmed" mb={6}>
-            UniProt
-          </Text>
+        <SectionCard>
+          <SectionLabel>UniProt</SectionLabel>
           <Group gap="xs">
             {uniprotIds.map((id) => (
               <Anchor
@@ -86,15 +103,15 @@ const ProteinDetails = ({ data, ccTerms, uniprotIds }: ProteinDetailsProps) => {
                 target="_blank"
                 rel="noopener noreferrer"
                 size="sm"
+                fw={600}
+                c="violet.4"
               >
                 {id}
               </Anchor>
             ))}
           </Group>
-        </Box>
+        </SectionCard>
       )}
-
-      <Divider />
     </>
   );
 };
@@ -164,30 +181,67 @@ export function ProteinTab() {
       : [uniprotId]
     : [];
 
+  const hasAnyData =
+    !!data.summary || ccTerms.length > 0 || uniprotIds.length > 0;
+
   return (
-    <ScrollArea h="100%" p="md">
-      <Stack gap="md" p="md">
-        <Box>
+    <ScrollArea h="100%">
+      <Stack gap="sm" p="md">
+        {/* Gene header card */}
+        <Box
+          p="sm"
+          style={{
+            background: 'var(--mantine-color-default)',
+            borderRadius: 'var(--mantine-radius-md)',
+            border: '1px solid var(--mantine-color-default-border)',
+          }}
+        >
           <Title order={5}>{data.symbol}</Title>
           {data.name && (
-            <Text size="xs" c="dimmed">
+            <Text size="xs" c="dimmed" mt={2}>
               {data.name}
             </Text>
           )}
         </Box>
 
-        <ProteinDetails data={data} ccTerms={ccTerms} uniprotIds={uniprotIds} />
+        {hasAnyData ? (
+          <ProteinDetails
+            data={data}
+            ccTerms={ccTerms}
+            uniprotIds={uniprotIds}
+          />
+        ) : (
+          <Box
+            p="md"
+            style={{
+              background: 'var(--mantine-color-default)',
+              borderRadius: 'var(--mantine-radius-md)',
+              border: '1px solid var(--mantine-color-default-border)',
+              textAlign: 'center',
+            }}
+          >
+            <Text size="sm" c="dimmed">
+              No protein data available — this may be a non-coding RNA or
+              uncharacterised gene.
+            </Text>
+          </Box>
+        )}
 
-        <Text size="xs" c="dimmed">
-          Data sourced from{' '}
-          <Anchor href="https://mygene.info" target="_blank" size="xs">
+        <Text size="xs" c="dimmed" ta="right">
+          <Anchor
+            href="https://mygene.info"
+            target="_blank"
+            size="xs"
+            c="dimmed"
+          >
             mygene.info
-          </Anchor>{' '}
-          · GO terms link to{' '}
+          </Anchor>
+          {' · '}
           <Anchor
             href="https://www.ebi.ac.uk/QuickGO"
             target="_blank"
             size="xs"
+            c="dimmed"
           >
             QuickGO
           </Anchor>
