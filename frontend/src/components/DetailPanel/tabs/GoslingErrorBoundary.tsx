@@ -1,5 +1,5 @@
 import { Center, Stack, Text } from '@mantine/core';
-import { IconAlertTriangle } from '@tabler/icons-react';
+import IconAlertTriangle from '@tabler/icons-react/dist/esm/icons/IconAlertTriangle.mjs';
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 
 interface Props {

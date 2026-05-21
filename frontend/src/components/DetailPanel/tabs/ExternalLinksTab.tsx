@@ -1,6 +1,6 @@
 import { useAppSelector } from '@/store/hook';
 import { Anchor, Box, Divider, Group, Stack, Text } from '@mantine/core';
-import { IconExternalLink } from '@tabler/icons-react';
+import IconExternalLink from '@tabler/icons-react/dist/esm/icons/IconExternalLink.mjs';
 import { useMemo } from 'react';
 
 export function ExternalLinksTab() {

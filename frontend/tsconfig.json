@@ -9,6 +9,7 @@
 
     /* modules */
     "resolveJsonModule": true,
+    "module": "ESNext",
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
 

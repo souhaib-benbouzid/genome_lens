@@ -13,7 +13,7 @@ import {
   Text,
   Title,
 } from '@mantine/core';
-import { IconMicroscope } from '@tabler/icons-react';
+import IconMicroscope from '@tabler/icons-react/dist/esm/icons/IconMicroscope.mjs';
 
 /** Normalise mygene.info's CC field — can be a single object or an array. */
 function toCCArray(cc: GoTerm | GoTerm[] | undefined): GoTerm[] {

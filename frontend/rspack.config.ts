@@ -1,3 +1,4 @@
+import { RsdoctorRspackPlugin } from '@rsdoctor/rspack-plugin';
 import { defineConfig } from '@rspack/cli';
 import { rspack, type SwcLoaderOptions } from '@rspack/core';
 import { ReactRefreshRspackPlugin } from '@rspack/plugin-react-refresh';
@@ -9,10 +10,17 @@ export default defineConfig({
   entry: {
     main: './src/main.tsx',
   },
-  target: ['browserslist:last 2 versions, > 0.2%, not dead, Firefox ESR'],
+  devtool: isDev ? 'eval-source-map' : 'cheap-source-map',
+  target: [
+    'browserslist:last 2 Chrome versions, last 2 Firefox versions, last 2 Safari versions, last 2 Edge versions, not dead',
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
+      '@tabler/icons-react': path.resolve(
+        __dirname,
+        'node_modules/@tabler/icons-react/dist/esm/icons/index.mjs',
+      ),
     },
     extensions: ['...', '.ts', '.tsx', '.jsx'],
   },
@@ -54,7 +62,65 @@ export default defineConfig({
       template: './index.html',
     }),
     isDev && new ReactRefreshRspackPlugin(),
+    !isDev &&
+      new RsdoctorRspackPlugin({
+        disableClientServer: true,
+        output: {
+          reportDir: path.resolve(__dirname, 'rsdoctor-report'),
+          mode: 'brief',
+          options: {
+            type: ['json', 'html'],
+          },
+        },
+      }),
   ],
+  output: {
+    filename: isDev ? '[name].js' : '[name].[contenthash:8].js',
+    chunkFilename: isDev ? '[name].js' : '[name].[contenthash:8].js',
+    cssFilename: isDev ? '[name].css' : '[name].[contenthash:8].css',
+    cssChunkFilename: isDev ? '[name].css' : '[name].[contenthash:8].css',
+  },
+  optimization: {
+    splitChunks: {
+      chunks: 'all',
+      maxInitialRequests: 25,
+      maxAsyncRequests: 25,
+      cacheGroups: {
+        mantine: {
+          test: /[\\/]node_modules[\\/](@mantine|mantine-react-table)[\\/]/,
+          name: 'vendor-mantine',
+          priority: 30,
+          chunks: 'all',
+        },
+        genomics: {
+          test: /[\\/]node_modules[\\/](gosling\.js|higlass|pixi\.js|@pixi)[\\/]/,
+          name: 'vendor-genomics',
+          priority: 20,
+          enforce: true,
+          chunks: 'async',
+        },
+        pdf: {
+          test: /[\\/]node_modules[\\/](jspdf|html2canvas|canvg|svg-pathdata|rgbcolor|stackblur-canvas)[\\/]/,
+          name: 'vendor-pdf',
+          priority: 25,
+          chunks: 'async',
+        },
+        tablerIcons: {
+          test: /[\\/]node_modules[\\/]@tabler[\\/]icons-react[\\/]/,
+          name: 'vendor-icons',
+          priority: 35,
+          enforce: true,
+          chunks: 'all',
+        },
+        coreJs: {
+          test: /[\\/]node_modules[\\/]core-js[\\/]/,
+          name: 'vendor-polyfills',
+          priority: 15,
+          chunks: 'async',
+        },
+      },
+    },
+  },
   devServer: {
     host: 'localhost',
     hot: true,

@@ -7,24 +7,26 @@ import {
   Box,
   Center,
   Group,
+  Loader,
   Stack,
   Tabs,
   Text,
   Title,
 } from '@mantine/core';
-import {
-  IconActivity,
-  IconDna,
-  IconExternalLink,
-  IconFlask,
-  IconMicroscope,
-} from '@tabler/icons-react';
-import { useMemo } from 'react';
-import { DifferentialTab } from './tabs/DifferentialTab';
-import { ExpressionTab } from './tabs/ExpressionTab';
-import { ExternalLinksTab } from './tabs/ExternalLinksTab';
-import { GenomicTab } from './tabs/GenomicTab';
-import { ProteinTab } from './tabs/ProteinTab';
+import IconActivity from '@tabler/icons-react/dist/esm/icons/IconActivity.mjs';
+import IconDna from '@tabler/icons-react/dist/esm/icons/IconDna.mjs';
+import IconExternalLink from '@tabler/icons-react/dist/esm/icons/IconExternalLink.mjs';
+import IconFlask from '@tabler/icons-react/dist/esm/icons/IconFlask.mjs';
+import IconMicroscope from '@tabler/icons-react/dist/esm/icons/IconMicroscope.mjs';
+import { lazy, Suspense, useMemo } from 'react';
+
+function TabFallback() {
+  return (
+    <Center h={200}>
+      <Loader size="sm" />
+    </Center>
+  );
+}
 interface TabHeader {
   value: ActiveTab;
   label: string;
@@ -33,7 +35,7 @@ interface TabHeader {
 
 interface TabItem {
   value: ActiveTab;
-  Component: React.ReactNode;
+  Component: React.LazyExoticComponent<() => JSX.Element>;
 }
 
 function EmptyState() {
@@ -126,11 +128,46 @@ export function DetailPanel() {
 
   const tabItems: TabItem[] = useMemo(
     () => [
-      { value: 'genomic', Component: <GenomicTab /> },
-      { value: 'expression', Component: <ExpressionTab /> },
-      { value: 'protein', Component: <ProteinTab /> },
-      { value: 'differential', Component: <DifferentialTab /> },
-      { value: 'external-links', Component: <ExternalLinksTab /> },
+      {
+        value: 'genomic',
+        Component: lazy(() =>
+          import('./tabs/GenomicTab').then((module) => ({
+            default: module.GenomicTab,
+          })),
+        ),
+      },
+      {
+        value: 'expression',
+        Component: lazy(() =>
+          import('./tabs/ExpressionTab').then((module) => ({
+            default: module.ExpressionTab,
+          })),
+        ),
+      },
+      {
+        value: 'protein',
+        Component: lazy(() =>
+          import('./tabs/ProteinTab').then((module) => ({
+            default: module.ProteinTab,
+          })),
+        ),
+      },
+      {
+        value: 'differential',
+        Component: lazy(() =>
+          import('./tabs/DifferentialTab').then((module) => ({
+            default: module.DifferentialTab,
+          })),
+        ),
+      },
+      {
+        value: 'external-links',
+        Component: lazy(() =>
+          import('./tabs/ExternalLinksTab').then((module) => ({
+            default: module.ExternalLinksTab,
+          })),
+        ),
+      },
     ],
     [],
   );
@@ -170,7 +207,9 @@ export function DetailPanel() {
         <Box style={{ flex: 1, overflow: 'auto' }}>
           {tabItems.map((item) => (
             <Tabs.Panel key={item.value} value={item.value}>
-              {item.Component}
+              <Suspense fallback={<TabFallback />}>
+                <item.Component />
+              </Suspense>
             </Tabs.Panel>
           ))}
         </Box>

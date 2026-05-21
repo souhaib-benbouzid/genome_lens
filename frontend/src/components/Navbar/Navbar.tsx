@@ -8,7 +8,8 @@ import {
   useComputedColorScheme,
   useMantineColorScheme,
 } from '@mantine/core';
-import { IconMoon, IconSun } from '@tabler/icons-react';
+import IconMoon from '@tabler/icons-react/dist/esm/icons/IconMoon.mjs';
+import IconSun from '@tabler/icons-react/dist/esm/icons/IconSun.mjs';
 import { header } from './Navbar.module.css';
 
 export function Navbar() {

@@ -2,7 +2,8 @@ import type { AppDispatch } from '@/store';
 import { setFilters } from '@/store/genesSlice';
 import type { FilterParams } from '@/types/gene';
 import { ActionIcon, Group, Select, Stack, TextInput } from '@mantine/core';
-import { IconSearch, IconX } from '@tabler/icons-react';
+import IconSearch from '@tabler/icons-react/dist/esm/icons/IconSearch.mjs';
+import IconX from '@tabler/icons-react/dist/esm/icons/IconX.mjs';
 
 interface GeneTableToolbarProps {
   rawSearch: string;
