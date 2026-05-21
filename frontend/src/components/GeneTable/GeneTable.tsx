@@ -57,6 +57,8 @@ export function GeneTable() {
     enableTopToolbar: false,
     enableBottomToolbar: false,
     enableColumnActions: false,
+    enableColumnResizing: true,
+    columnResizeMode: 'onChange',
     enableFilters: false,
     getRowId: (row) => String(row.id),
   });

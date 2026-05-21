@@ -1,7 +1,17 @@
+/* Light mode */
 .selectedRow td {
   background-color: var(--mantine-color-blue-0) !important;
 }
 
 .selectedRow:hover td {
   background-color: var(--mantine-color-blue-1) !important;
+}
+
+/* Dark mode */
+[data-mantine-color-scheme='dark'] .selectedRow td {
+  background-color: var(--mantine-color-blue-9) !important;
+}
+
+[data-mantine-color-scheme='dark'] .selectedRow:hover td {
+  background-color: var(--mantine-color-blue-8) !important;
 }
