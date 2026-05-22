@@ -140,3 +140,28 @@ Response:
 ```
 
 The `has_more` flag eliminates the need for any client-side arithmetic — the table calls the next window only when `has_more` is `true`.
+
+## MVP Features
+
+- Virtualized, infinite-scroll table of all human genes
+- Server-side filtering by biotype, chromosome
+- Server-side sorting by ensembl_id, gene_symbol, biotype, chromosome, start, end sequence
+- Protein info (mygene.info)
+- External links (Ensembl, NCBI, UniProt, GTEx, …)
+- Interactive genomic visualization (Gosling.js)
+- RTK Query for data fetching + caching
+- Mantine UI components + theming
+- Rspack bundler for fast optimized builds.
+- Responsive layout: split-panel (desktop) + Drawer (mobile)
+- Dark/light themes
+
+## Future Enhancements
+
+- Tissue expression charts (GTEx)
+- Differential expression (LFC, p-values across conditions)
+- Dynamic column addition (e.g. expression level, p-value)
+- Export current table view (CSV)
+- Improved error handling + loading states (skeletons, toasts)
+- Accessibility improvements (ARIA roles, keyboard navigation)
+- Performance optimizations (memoization, virtualization tuning)
+- Additional sorting options (e.g. by expression level, p-value)
