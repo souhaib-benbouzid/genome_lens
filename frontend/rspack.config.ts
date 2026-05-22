@@ -5,6 +5,7 @@ import { ReactRefreshRspackPlugin } from '@rspack/plugin-react-refresh';
 import path from 'path';
 
 const isDev = process.env.NODE_ENV === 'development';
+const isProd = process.env.NODE_ENV === 'production';
 
 export default defineConfig({
   entry: {
@@ -62,7 +63,7 @@ export default defineConfig({
       template: './index.html',
     }),
     isDev && new ReactRefreshRspackPlugin(),
-    !isDev &&
+    isProd &&
       new RsdoctorRspackPlugin({
         disableClientServer: true,
         output: {
