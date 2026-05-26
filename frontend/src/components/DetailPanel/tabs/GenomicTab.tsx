@@ -5,6 +5,12 @@ import { GoslingComponent } from 'gosling.js';
 import { useEffect, useRef } from 'react';
 import { GoslingErrorBoundary } from './GoslingErrorBoundary';
 
+function normalizeChromosome(input: string | undefined): string | undefined {
+  if (!input) return input;
+  if (input === 'M T') return 'MT';
+  return input.trim();
+}
+
 const SPEC: GoslingSpec = {
   assembly: 'hg38',
   layout: 'linear',
@@ -115,23 +121,17 @@ export function GenomicTab() {
   const selectedGene = useAppSelector((s) => s.genes.selectedGene);
   const gosRef = useRef<GoslingRef>(null);
   const { colorScheme } = useMantineColorScheme();
-  // ...
+
   useEffect(() => {
     const { chromosome, seq_region_start, seq_region_end } = selectedGene ?? {};
     if (!chromosome || seq_region_start == null || seq_region_end == null)
       return;
 
     // Gosling expects 'chrN:start-end'. The DB stores chromosome as '1', 'X', etc.
-    const position = `chr${chromosome}:${seq_region_start}-${seq_region_end}`;
+    const position = `chr${normalizeChromosome(chromosome)}:${seq_region_start}-${seq_region_end}`;
 
-    // Small delay so the component has time to fully initialise before the API call.
     const timer = setTimeout(() => {
-      gosRef.current?.api.zoomTo(
-        'gene-track',
-        position,
-        2000, // bp padding either side of the gene
-        800, // animation duration ms
-      );
+      gosRef.current?.api.zoomTo('gene-track', position, 2000, 800);
     }, 200);
 
     return () => clearTimeout(timer);

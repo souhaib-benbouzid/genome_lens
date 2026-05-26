@@ -31,7 +31,7 @@ const CHROMOSOME_COLORS: Record<string, string> = {
   '22': '#6a4c93',
   X: '#e76f51',
   Y: '#264653',
-  MT: '#2f4858',
+  'M T': '#2f4858',
   default: '#868e96',
 };
 
