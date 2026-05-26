@@ -1,15 +1,9 @@
 import { useAppSelector } from '@/store/hook';
-import { Center, Text, useMantineColorScheme } from '@mantine/core';
+import { Box, Center, Text, useMantineColorScheme } from '@mantine/core';
 import type { GoslingRef, GoslingSpec } from 'gosling.js';
 import { GoslingComponent } from 'gosling.js';
 import { useEffect, useRef } from 'react';
 import { GoslingErrorBoundary } from './GoslingErrorBoundary';
-
-function normalizeChromosome(input: string | undefined): string | undefined {
-  if (!input) return input;
-  if (input === 'M T') return 'MT';
-  return input.trim();
-}
 
 const SPEC: GoslingSpec = {
   assembly: 'hg38',
@@ -128,7 +122,7 @@ export function GenomicTab() {
       return;
 
     // Gosling expects 'chrN:start-end'. The DB stores chromosome as '1', 'X', etc.
-    const position = `chr${normalizeChromosome(chromosome)}:${seq_region_start}-${seq_region_end}`;
+    const position = `chr${chromosome}:${seq_region_start}-${seq_region_end}`;
 
     const timer = setTimeout(() => {
       gosRef.current?.api.zoomTo('gene-track', position, 2000, 800);
@@ -136,6 +130,29 @@ export function GenomicTab() {
 
     return () => clearTimeout(timer);
   }, [selectedGene]);
+
+  if (!selectedGene) {
+    return (
+      <Center mt="xs">
+        <Text size="xs">Select a gene in the table to zoom to its locus.</Text>
+      </Center>
+    );
+  }
+
+  if (selectedGene?.chromosome === 'M T') {
+    return (
+      <Box
+        m="xs"
+        p="md"
+        bg={colorScheme === 'dark' ? 'dark.7' : 'gray.0'}
+        h="100%"
+      >
+        <Text size="xs">
+          No genomic location available for this gene in the hg38 assembly.
+        </Text>
+      </Box>
+    );
+  }
 
   return (
     <div style={{ padding: '18px', height: '100%', overflow: 'auto' }}>

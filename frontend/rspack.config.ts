@@ -18,13 +18,15 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
-      '@tabler/icons-react': path.resolve(
-        __dirname,
-        'node_modules/@tabler/icons-react/dist/esm/icons/index.mjs',
-      ),
     },
+    conditionNames: ['import', 'module', 'browser', 'require', 'default'],
     extensions: ['...', '.ts', '.tsx', '.jsx'],
+    fallback: {
+      tty: false,
+      util: false,
+    },
   },
+
   module: {
     rules: [
       {
